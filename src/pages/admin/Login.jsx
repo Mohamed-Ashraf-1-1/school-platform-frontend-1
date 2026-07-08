@@ -12,15 +12,19 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // جلب المسار السري من المتغيرات البيئية
+  const secretPath = import.meta.env.VITE_ADMIN_SECRET_PATH || 'secret-hub-portal-2026-x';
+
   if (isAuthed) {
-    const from = location.state?.from?.pathname || '/admin/dashboard';
+    const from = location.state?.from?.pathname || `/${secretPath}/dashboard`;
     return <Navigate to={from} replace />;
   }
 
   const onSubmit = (e) => {
     e.preventDefault();
     if (login(password)) {
-      navigate('/admin/dashboard', { replace: true });
+      // التوجيه للمسار السري الصحيح بعد نجاح تسجيل الدخول
+      navigate(`/${secretPath}/dashboard`, { replace: true });
     } else {
       setError(true);
     }
