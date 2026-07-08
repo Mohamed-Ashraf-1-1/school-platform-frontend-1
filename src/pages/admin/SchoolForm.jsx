@@ -4,7 +4,8 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { FiPlus, FiTrash2, FiSave, FiArrowLeft, FiArrowRight } from 'react-icons/fi';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
-import { getSchoolBySlug, createSchool, updateSchool } from '../../services/schools.js';
+// 🛠️ تم جلب دالة getSchoolById بدلاً من slug لأن الروابط تعتمد على المعرف الرقمي
+import { getSchoolById, createSchool, updateSchool } from '../../services/schools.js';
 import { governoratesApi } from '../../services/governorates.js';
 import { partnersApi } from '../../services/partners.js';
 import { specializationsApi } from '../../services/specializations.js';
@@ -38,8 +39,9 @@ const emptyDefaults = {
 };
 
 export default function SchoolForm() {
-  const { slug } = useParams();
-  const isEdit = Boolean(slug);
+  // 🛠️ استقبال id بدلاً من slug ليتوافق مع هيكلة الروابط المتواجدة بالصورة والـ Router
+  const { id } = useParams();
+  const isEdit = Boolean(id);
   const navigate = useNavigate();
   const { t, lang, dir } = useLanguage();
   const toast = useToast();
@@ -76,7 +78,8 @@ export default function SchoolForm() {
   useEffect(() => {
     if (!isEdit) return;
     setLoading(true);
-    getSchoolBySlug(slug)
+    // 🛠️ جلب بيانات المدرسة الحالية عن طريق الـ id لتعرض داخل الـ inputs بنجاح
+    getSchoolById(id)
       .then((res) => {
         const s = res.data;
         setSchoolId(s.id);
@@ -114,7 +117,7 @@ export default function SchoolForm() {
       .catch(() => toast.error(t('admin_toast_error')))
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug]);
+  }, [id]);
 
   const onSubmit = async (values) => {
     setSaving(true);
@@ -164,7 +167,8 @@ export default function SchoolForm() {
         await createSchool(payload);
         toast.success(t('admin_toast_created'));
       }
-      navigate('/admin/schools');
+      // 🛠️ تعديل مسار العودة بعد الحفظ بنجاح ليطابق اللينك السري للوحة التحكم
+      navigate('/secret-hub-portal-2026-x/schools');
     } catch (err) {
       toast.error(err.message || t('admin_toast_error'));
     } finally {
@@ -182,8 +186,9 @@ export default function SchoolForm() {
 
   return (
     <div>
+      {/* 🛠️ تعديل مسار زر العودة العلوي ليطابق اللينك السري للوحة التحكم */}
       <button
-        onClick={() => navigate('/admin/schools')}
+        onClick={() => navigate('/secret-hub-portal-2026-x/schools')}
         className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-ink-400 hover:text-ink-700"
       >
         <BackArrow className="h-4 w-4" />
@@ -402,8 +407,9 @@ export default function SchoolForm() {
           )}
         />
 
+        {/* 🛠️ تعديل مسار زر الإلغاء السفلي ليطابق اللينك السري للوحة التحكم */}
         <div className="sticky bottom-4 flex justify-end gap-2 rounded-2xl border border-ink-100 bg-white/95 p-3 shadow-lifted backdrop-blur">
-          <button type="button" className="btn-outline" onClick={() => navigate('/admin/schools')}>
+          <button type="button" className="btn-outline" onClick={() => navigate('/secret-hub-portal-2026-x/schools')}>
             {t('admin_cancel')}
           </button>
           <button type="submit" disabled={saving} className="btn-accent">
