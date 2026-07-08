@@ -168,19 +168,18 @@ export default function Schools() {
         </div>
       </div>
 
-      {/* 🏁 الشريط العائم السفلي الذي يظهر تلقائياً ويحتوي على زر الذهاب لصفحة المقارنة بعد تعديله لـ compare.ids */}
+      {/* 🏁 زر بسيط باللون الكحلي الغامق يظهر أسفل اليسار (الجنب الشمال) عند اختيار مدرستين أو أكثر */}
       {compare?.ids && compare.ids.length >= 2 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-ink-900 text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-6 animate-fade-in backdrop-blur-md bg-opacity-95 border border-ink-700">
-          <div className="text-sm font-medium">
-            {t('compare_selected_count', { count: compare.ids.length })} {compare.ids.length} {t('nav_compare')}
-          </div>
-          <button
-            onClick={() => navigate('/compare')}
-            className="bg-brand-500 hover:bg-brand-600 text-ink-950 font-bold text-xs px-5 py-2.5 rounded-full transition-all duration-300 transform hover:scale-105 shadow-md"
-          >
-            {t('go_to_compare') || 'اذهب للمقارنة ←'}
-          </button>
-        </div>
+        <button
+          onClick={() => navigate('/compare')}
+          className="fixed bottom-6 left-6 z-50 bg-[#0f172a] hover:bg-[#1e293b] text-white font-bold text-sm px-6 py-3.5 rounded-xl shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2 border border-slate-700 tracking-wide"
+        >
+          <span>اذهب للمقارنة</span>
+          <span className="text-base">←</span>
+          <span className="bg-[#334155] text-white text-xs px-2 py-0.5 rounded-full font-medium ml-1">
+            {compare.ids.length}
+          </span>
+        </button>
       )}
     </div>
   );
