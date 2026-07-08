@@ -9,8 +9,8 @@ export default function ProtectedRoute({ children }) {
   const secretPath = import.meta.env.VITE_ADMIN_SECRET_PATH || 'secret-hub-portal-2026-x';
 
   if (!isAuthed) {
-    // التوجيه تلقائياً إلى الرابط السري المظبوط بدلاً من العنوان القديم
-    return <Navigate to={`/${secretPath}`} replace state={{ from: location }} />;
+    // التوجيه تلقائياً إلى مسار الـ login الجديد داخل الرابط السري لمنع الـ Infinite Loop
+    return <Navigate to={`/${secretPath}/login`} replace state={{ from: location }} />;
   }
   return children;
 }

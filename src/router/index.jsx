@@ -43,11 +43,10 @@ export default function AppRouter() {
           <Route path="*" element={<NotFound />} />
         </Route>
 
-        {/* 🔒 رابط بوابة تسجيل الدخول (الرابط السري مباشرة) */}
-        <Route path={`/${import.meta.env.VITE_ADMIN_SECRET_PATH}`} element={<Login />} />
+        {/* 🔒 رابط بوابة تسجيل الدخول (تم إضافة /login لمنع الدوران اللانهائي) */}
+        <Route path={`/${import.meta.env.VITE_ADMIN_SECRET_PATH}/login`} element={<Login />} />
 
         {/* 🔒 Admin dashboard (protected) */}
-        {/* تم جعل المسار الأب هو المتغير السري مباشرة ليتوافق مع الـ Sidebar الفرعي */}
         <Route
           path={`/${import.meta.env.VITE_ADMIN_SECRET_PATH}`}
           element={
