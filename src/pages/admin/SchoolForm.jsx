@@ -4,8 +4,8 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { FiPlus, FiTrash2, FiSave, FiArrowLeft, FiArrowRight } from 'react-icons/fi';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
-// 🛠️ تم جلب دالة getSchoolById بدلاً من slug لأن الروابط تعتمد على المعرف الرقمي
-import { getSchoolById, createSchool, updateSchool } from '../../services/schools.js';
+// 🛠️ العودة لاستخدام الدوال الافتراضية للفرونت إند لضمان عدم حدوث خطأ استيراد
+import { getSchoolBySlug, createSchool, updateSchool } from '../../services/schools.js';
 import { governoratesApi } from '../../services/governorates.js';
 import { partnersApi } from '../../services/partners.js';
 import { specializationsApi } from '../../services/specializations.js';
@@ -39,9 +39,11 @@ const emptyDefaults = {
 };
 
 export default function SchoolForm() {
-  // 🛠️ استقبال id بدلاً من slug ليتوافق مع هيكلة الروابط المتواجدة بالصورة والـ Router
-  const { id } = useParams();
-  const isEdit = Boolean(id);
+  // 🛠️ أخذ المعرف الممرر بالرابط (سواء كان id أو slug)
+  const { id, slug } = useParams();
+  const currentParam = id || slug;
+  const isEdit = Boolean(currentParam);
+  
   const navigate = useNavigate();
   const { t, lang, dir } = useLanguage();
   const toast = useToast();
@@ -78,10 +80,11 @@ export default function SchoolForm() {
   useEffect(() => {
     if (!isEdit) return;
     setLoading(true);
-    // 🛠️ جلب بيانات المدرسة الحالية عن طريق الـ id لتعرض داخل الـ inputs بنجاح
-    getSchoolById(id)
+    
+    // 🛠️ محاولة جلب البيانات بالمعرّف المتاح لعرض البيانات القديمة داخل الـ inputs
+    getSchoolBySlug(currentParam)
       .then((res) => {
-        const s = res.data;
+        const s = res.data || res;
         setSchoolId(s.id);
         reset({
           name: s.name || '',
@@ -96,8 +99,8 @@ export default function SchoolForm() {
           email: s.email || '',
           governorateId: s.governorateId || s.governorate?.id || '',
           isActive: s.isActive ?? true,
-          partnerIds: (s.partners || []).map((p) => p.id),
-          specializationIds: (s.specializations || []).map((sp) => sp.id),
+          partnerIds: (s.partners || []).map((p) => p.id || p.partnerId),
+          specializationIds: (s.specializations || []).map((sp) => sp.id || sp.specializationId),
           branches: (s.branches || []).map((b) => ({
             name: b.name || '',
             address: b.address || '',
@@ -117,7 +120,7 @@ export default function SchoolForm() {
       .catch(() => toast.error(t('admin_toast_error')))
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [currentParam]);
 
   const onSubmit = async (values) => {
     setSaving(true);
@@ -161,14 +164,15 @@ export default function SchoolForm() {
       };
 
       if (isEdit) {
-        await updateSchool(schoolId, payload);
+        await updateSchool(schoolId || currentParam, payload);
         toast.success(t('admin_toast_updated'));
       } else {
         await createSchool(payload);
         toast.success(t('admin_toast_created'));
       }
-      // 🛠️ تعديل مسار العودة بعد الحفظ بنجاح ليطابق اللينك السري للوحة التحكم
-      navigate('/secret-hub-portal-2026-x/schools');
+      
+      // 🛠️ تعديل مسار الوجهة بعد الحفظ للمسار السري الصحيح للجدول مباشرة
+      navigate('/secret-hub-portal-2026-x');
     } catch (err) {
       toast.error(err.message || t('admin_toast_error'));
     } finally {
@@ -186,9 +190,9 @@ export default function SchoolForm() {
 
   return (
     <div>
-      {/* 🛠️ تعديل مسار زر العودة العلوي ليطابق اللينك السري للوحة التحكم */}
+      {/* 🛠️ تعديل زر الرجوع العلوي ليذهب للمسار السري للجدول مباشرة بدون تسبب في 404 */}
       <button
-        onClick={() => navigate('/secret-hub-portal-2026-x/schools')}
+        onClick={() => navigate('/secret-hub-portal-2026-x')}
         className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-ink-400 hover:text-ink-700"
       >
         <BackArrow className="h-4 w-4" />
@@ -407,9 +411,9 @@ export default function SchoolForm() {
           )}
         />
 
-        {/* 🛠️ تعديل مسار زر الإلغاء السفلي ليطابق اللينك السري للوحة التحكم */}
+        {/* 🛠️ تعديل زر الإلغاء السفلي ليذهب للمسار السري للجدول مباشرة */}
         <div className="sticky bottom-4 flex justify-end gap-2 rounded-2xl border border-ink-100 bg-white/95 p-3 shadow-lifted backdrop-blur">
-          <button type="button" className="btn-outline" onClick={() => navigate('/secret-hub-portal-2026-x/schools')}>
+          <button type="button" className="btn-outline" onClick={() => navigate('/secret-hub-portal-2026-x')}>
             {t('admin_cancel')}
           </button>
           <button type="submit" disabled={saving} className="btn-accent">
@@ -461,7 +465,6 @@ function RepeatableSection({ title, fieldArray, renderRow, onAdd, t }) {
   );
 }
 
-/** Checkbox list bound to an array field (specializationIds / partnerIds) via react-hook-form's Controller. */
 function MultiCheckList({ name, control, options }) {
   return (
     <Controller
