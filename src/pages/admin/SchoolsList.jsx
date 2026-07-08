@@ -83,7 +83,9 @@ export default function SchoolsList() {
   return (
     <div>
       <PageHeader title={t('admin_sidebar_schools')} subtitle={t('admin_dashboard_sub')} />
-      <Toolbar search={search} onSearchChange={setSearch} onAddClick={() => navigate('/admin/schools/new')} />
+      
+      {/* 🛠️ تعديل توجيه زر إضافة جديد ليذهب للمسار السري الصحيح */}
+      <Toolbar search={search} onSearchChange={setSearch} onAddClick={() => navigate('/secret-hub-portal-2026-x/schools/new')} />
 
       <DataTable
         columns={columns}
@@ -100,13 +102,16 @@ export default function SchoolsList() {
             >
               <FiEye className="h-3.5 w-3.5" />
             </a>
+            
+            {/* 🛠️ تعديل توجيه زر التعديل ليعتمد على المسار السري والـ ID الرقمي الآمن */}
             <button
-              onClick={() => navigate(`/admin/schools/${row.slug}/edit`)}
+              onClick={() => navigate(`/secret-hub-portal-2026-x/schools/${row.id}/edit`)}
               className="flex h-8 w-8 items-center justify-center rounded-full text-ink-500 hover:bg-ink-50"
               aria-label={t('admin_edit')}
             >
               <FiEdit2 className="h-3.5 w-3.5" />
             </button>
+            
             <button
               onClick={() => setDeleteTarget(row)}
               className="flex h-8 w-8 items-center justify-center rounded-full text-clay-500 hover:bg-clay-50"
