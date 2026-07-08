@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { listSchools } from '../../services/schools.js';
 import { useCompareList } from '../../hooks/useCompareList.js';
-import SchoolFilters, { emptyFilters } from '../../components/public/SchoolFilters.jsx';
+import SchoolFilters from '../../components/public/SchoolFilters.jsx';
 import SchoolCard from '../../components/public/SchoolCard.jsx';
 import Pagination from '../../components/common/Pagination.jsx';
 import Spinner from '../../components/common/Spinner.jsx';
@@ -23,6 +23,7 @@ function sanitizeSearchInput(value) {
 export default function Schools() {
   const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const compare = useCompareList();
 
   // Read every filter value directly from the URL params to keep them in sync
@@ -37,11 +38,6 @@ export default function Schools() {
   const [page, setPage] = useState(1);
   const [state, setState] = useState({ items: null, meta: null, error: null });
 
-  // NOTE: the search box now debounces itself *before* writing to the URL
-  // (see SchoolFilters.jsx), so by the time searchParam changes here it has
-  // already settled - no need to debounce it a second time. We still run it
-  // through sanitizeSearchInput as defense-in-depth against stray
-  // HTML/script-like characters before it's sent to the API.
   const safeSearch = sanitizeSearchInput(searchParam);
 
   const handleFilterChange = (newFilters) => {
@@ -93,7 +89,8 @@ export default function Schools() {
     })
       .then((res) => {
         if (cancelled) return;
-        setState({ items: res.data || [], meta: res.meta || null, error: null });
+        // قمنا بتعديل res.data إلى res.items ليتوافق تماماً مع الـ Object القادم من الباك إند
+        setState({ items: res.items || [], meta: res.meta || null, error: null });
       })
       .catch((err) => {
         if (cancelled) return;
@@ -170,6 +167,21 @@ export default function Schools() {
           )}
         </div>
       </div>
+
+      {/* 🛠️ الكود المضاف لإظهار زرار بار المقارنة العائم في أسفل الصفحة تلقائياً عند تحديد مدرستين أو أكثر */}
+      {compare?.list && compare.list.length >= 2 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-ink-900 text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-6 animate-fade-in backdrop-blur-md bg-opacity-95 border border-ink-700">
+          <div className="text-sm font-medium">
+            {t('compare_selected_count', { count: compare.list.length })} {compare.list.length} {t('nav_compare')}
+          </div>
+          <button
+            onClick={() => navigate('/compare')}
+            className="bg-brand-500 hover:bg-brand-600 text-ink-950 font-bold text-xs px-5 py-2.5 rounded-full transition-all duration-300 transform hover:scale-105 shadow-md"
+          >
+            {t('go_to_compare') || 'اذهب للمقارنة ←'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
