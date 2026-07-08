@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html[dir='rtl'] body {
+  font-family: 'Cairo', 'Inter', sans-serif;
+}
+html[dir='ltr'] body {
+  font-family: 'Inter', sans-serif;
+}
+
+html[dir='rtl'] .font-display {
+  font-family: 'Noto Kufi Arabic', 'Space Grotesk', sans-serif;
+}
+
+body {
+  @apply bg-paper-200 text-ink-900 antialiased;
+}
+
+* {
+  scrollbar-color: theme('colors.ink.200') transparent;
+}
+
+::selection {
+  background-color: theme('colors.brass.200');
+  color: theme('colors.ink.900');
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visibility */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid theme('colors.brass.400');
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brass-600;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-ink-900 text-paper-100 hover:bg-ink-700 active:scale-[0.98];
+  }
+  .btn-accent {
+    @apply btn bg-brass-400 text-ink-900 hover:bg-brass-300 active:scale-[0.98];
+  }
+  .btn-outline {
+    @apply btn border border-ink-200 bg-transparent text-ink-800 hover:border-ink-400 hover:bg-ink-50 active:scale-[0.98];
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-ink-700 hover:bg-ink-50;
+  }
+  .btn-danger {
+    @apply btn bg-clay-500 text-paper-50 hover:bg-clay-600 active:scale-[0.98];
+  }
+
+  .card {
+    @apply rounded-2xl border border-ink-100 bg-white shadow-card;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-sm text-ink-900 placeholder:text-ink-300 transition focus:border-brass-400 focus:outline-none focus:ring-2 focus:ring-brass-100;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-ink-700;
+  }
+
+  .field-error {
+    @apply mt-1 text-xs font-medium text-clay-500;
+  }
+}
