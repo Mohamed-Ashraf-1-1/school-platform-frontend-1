@@ -89,8 +89,8 @@ export default function Schools() {
     })
       .then((res) => {
         if (cancelled) return;
-        // قمنا بتعديل res.data إلى res.items ليتوافق تماماً مع الـ Object القادم من الباك إند
-        setState({ items: res.items || [], meta: res.meta || null, error: null });
+        // تعديل وإرجاع res.data الأصلية لتظهر المدارس فوراً بنجاح
+        setState({ items: res.data || [], meta: res.meta || null, error: null });
       })
       .catch((err) => {
         if (cancelled) return;
@@ -168,7 +168,7 @@ export default function Schools() {
         </div>
       </div>
 
-      {/* 🛠️ الكود المضاف لإظهار زرار بار المقارنة العائم في أسفل الصفحة تلقائياً عند تحديد مدرستين أو أكثر */}
+      {/* 🏁 الشريط العائم السفلي الذي يظهر تلقائياً ويحتوي على زر الذهاب لصفحة المقارنة */}
       {compare?.list && compare.list.length >= 2 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-ink-900 text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-6 animate-fade-in backdrop-blur-md bg-opacity-95 border border-ink-700">
           <div className="text-sm font-medium">
