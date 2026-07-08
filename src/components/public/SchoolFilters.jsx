@@ -34,7 +34,6 @@ export default function SchoolFilters({ filters, onChange, onReset }) {
 
   const update = (key, value) => onChange({ ...filters, [key]: value });
 
-  // عدد الفلاتر الفعّالة حاليًا (تحسين بصري فقط، مايأثرش على أي منطق)
   const activeCount = Object.entries(filters).filter(([, v]) => v !== '' && v !== null && v !== undefined).length;
 
   const fieldLabelClass = 'label mb-1.5 flex items-center gap-1.5 text-ink-600';

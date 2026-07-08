@@ -12,7 +12,7 @@ import EmptyState from '../../components/common/EmptyState.jsx';
 import ErrorState from '../../components/common/ErrorState.jsx';
 import { PAGE_SIZE } from '../../utils/constants.js';
 
-// --- Security helper (الحفاظ على اللوجيك الأصلي) -------------------------------------------------
+// --- Security helper ---
 function sanitizeSearchInput(value) {
   if (!value) return '';
   return value
@@ -27,10 +27,13 @@ export default function Schools() {
   const navigate = useNavigate();
   const compare = useCompareList();
 
-  // --- States (الحفاظ على اللوجيك الأصلي) ---
+  // جلب الكلمة مباشرة من الرابط بشكل آمن
+  const searchParamValue = searchParams.get('search') || '';
+
+  // --- States ---
   const [filters, setFilters] = useState({
     ...emptyFilters,
-    search: searchParams.get('search') || '',
+    search: searchParamValue,
     specialization: searchParams.get('specialization') || '',
     governorate: searchParams.get('governorate') || '',
   });
@@ -40,11 +43,19 @@ export default function Schools() {
   const debouncedSearch = useDebounce(filters.search, 400);
   const safeSearch = sanitizeSearchInput(debouncedSearch);
 
-  // --- 🌟 التعديل هنا: حساب عدد المدارس المختارة بشكل عالمي ودائم من الـ Hook مباشرة 🌟 ---
+  // 🌟 تحديث الفلتر فوراً إذا تغير نص البحث في الـ URL فوق (من الهيدر أو الصفحة الرئيسية)
+  useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      search: searchParamValue
+    }));
+  }, [searchParamValue]);
+
+  // --- حساب عدد المدارس المختارة للمقارنة ---
   let selectedCount = 0;
   if (compare) {
     if (Array.isArray(compare.ids)) {
-      selectedCount = compare.ids.length; // الحل الأضمن والمباشر المعتمد على المعرفات المحفوظة
+      selectedCount = compare.ids.length;
     } else if (Array.isArray(compare)) {
       selectedCount = compare.length;
     } else if (typeof compare === 'object') {
@@ -57,7 +68,7 @@ export default function Schools() {
     }
   }
 
-  // --- Effects (الحفاظ على اللوجيك الأصلي بالكامل) ---
+  // --- Effects ---
   useEffect(() => {
     setPage(1);
   }, [
@@ -99,7 +110,6 @@ export default function Schools() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     page,
     safeSearch,
@@ -115,33 +125,15 @@ export default function Schools() {
 
   return (
     <div className="container-page py-10 sm:py-14 relative">
-      {/* --- التنسيقات المتقدمة لتساوي أطوال الكروت وانيميشن الدخول للزر الجانبي --- */}
       <style>{`
         @keyframes schoolCardFadeInUp {
-          0% {
-            opacity: 0;
-            transform: translateY(40px) scale(0.95);
-            filter: blur(4px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            filter: blur(0);
-          }
+          0% { opacity: 0; transform: translateY(40px) scale(0.95); filter: blur(4px); }
+          100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
         }
-        
         @keyframes compareBtnSidePop {
-          0% {
-            opacity: 0;
-            transform: translateY(20px) scale(0.9);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
+          0% { opacity: 0; transform: translateY(20px) scale(0.9); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
         }
-        
-        /* شبكة مرنة تجعل كل الصفوف متساوية الارتفاع تماماً */
         .equal-grid-container {
           display: grid;
           grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -154,8 +146,6 @@ export default function Schools() {
         @media (min-width: 1280px) {
           .equal-grid-container { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
-
-        /* حاوية الكارت وأنيميشن الـ Hover */
         .school-card-animate {
           opacity: 0;
           animation: schoolCardFadeInUp 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
@@ -165,14 +155,11 @@ export default function Schools() {
           flex-direction: column;
           height: 100%;
         }
-
         .school-card-animate:hover {
           transform: translateY(-8px) scale(1.015);
           box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
           z-index: 10;
         }
-
-        /* إجبار الكامبوننت الداخلي لـ SchoolCard على أخذ الارتفاع الكامل وتوزيع محتوياته بالتساوي */
         .school-card-animate > * {
           display: flex !important;
           flex-direction: column !important;
@@ -180,15 +167,12 @@ export default function Schools() {
           flex: 1 1 auto !important;
           justify-content: space-between !important;
         }
-
-        /* تنسيق وحركة زر المقارنة الجانبي */
         .compare-side-btn {
           animation: compareBtnSidePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
           box-shadow: 0 15px 30px -5px rgba(17, 30, 56, 0.3);
         }
       `}</style>
 
-      {/* --- الهيدر الخاص بالصفحة --- */}
       <div className="mb-8">
         <span className="eyebrow">{t('nav_schools')}</span>
         <h1 className="font-display mt-2 text-2xl font-bold text-ink-900 sm:text-3xl">
@@ -197,7 +181,6 @@ export default function Schools() {
         <p className="mt-1.5 text-sm text-ink-400">{t('schools_page_sub')}</p>
       </div>
 
-      {/* --- توزيع العناصر الأساسية بالصفحة --- */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[260px,1fr]">
         <SchoolFilters filters={filters} onChange={setFilters} onReset={resetFilters} />
 
@@ -240,7 +223,6 @@ export default function Schools() {
         </div>
       </div>
 
-      {/* --- زر اذهب للمقارنة الجانبي المتناسق مع ألوان الهوية البصرية الحالية للموقع --- */}
       {selectedCount >= 2 && (
         <div className="fixed bottom-6 right-6 z-50 rtl:right-auto rtl:left-6 max-w-xs px-2">
           <button
@@ -253,8 +235,6 @@ export default function Schools() {
               </svg>
               <span>اذهب للمقارنة</span>
             </div>
-            
-            {/* الشارة الدائرية للعدد متطابقة مع لون شارات الكروت الأزرق المشرق */}
             <span className="flex items-center justify-center bg-[#2563eb] text-white text-xs font-bold w-6 h-6 rounded-full shadow-sm">
               {selectedCount}
             </span>
