@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { listSchools } from '../../services/schools.js';
-import { useDebounce } from '../../hooks/useDebounce.js';
 import { useCompareList } from '../../hooks/useCompareList.js';
 import SchoolFilters, { emptyFilters } from '../../components/public/SchoolFilters.jsx';
 import SchoolCard from '../../components/public/SchoolCard.jsx';
@@ -17,16 +16,16 @@ function sanitizeSearchInput(value) {
   return value
     .replace(/<[^>]*>?/g, '')
     .replace(/[<>"'`;(){}[\]\\]/g, '')
+    .trim()
     .slice(0, 100);
 }
 
 export default function Schools() {
   const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const compare = useCompareList();
 
-  // قراءة كل القيم مباشرة من الـ URL Params لضمان التزامن
+  // Read every filter value directly from the URL params to keep them in sync
   const searchParam = searchParams.get('search') || '';
   const govParam = searchParams.get('governorate') || '';
   const specParam = searchParams.get('specialization') || '';
@@ -38,10 +37,13 @@ export default function Schools() {
   const [page, setPage] = useState(1);
   const [state, setState] = useState({ items: null, meta: null, error: null });
 
-  const debouncedSearch = useDebounce(searchParam, 400);
-  const safeSearch = sanitizeSearchInput(debouncedSearch);
+  // NOTE: the search box now debounces itself *before* writing to the URL
+  // (see SchoolFilters.jsx), so by the time searchParam changes here it has
+  // already settled - no need to debounce it a second time. We still run it
+  // through sanitizeSearchInput as defense-in-depth against stray
+  // HTML/script-like characters before it's sent to the API.
+  const safeSearch = sanitizeSearchInput(searchParam);
 
-  // دالة تحديث الفلاتر في الـ URL مباشرة
   const handleFilterChange = (newFilters) => {
     const params = new URLSearchParams();
     if (newFilters.search) params.set('search', newFilters.search);
@@ -52,7 +54,7 @@ export default function Schools() {
     if (newFilters.studyDuration) params.set('studyDuration', newFilters.studyDuration);
     if (newFilters.gender) params.set('gender', newFilters.gender);
     setSearchParams(params);
-    setPage(1); // إعادة التصفير للصفحة الأولى عند تغيير الفلاتر
+    setPage(1);
   };
 
   const resetFilters = () => {
@@ -60,7 +62,6 @@ export default function Schools() {
     setPage(1);
   };
 
-  // تجميع الفلاتر الحالية لإرسالها للمكون الفرعي
   const currentFilters = {
     search: searchParam,
     governorate: govParam,
@@ -71,12 +72,6 @@ export default function Schools() {
     gender: genderParam,
   };
 
-  let selectedCount = 0;
-  if (compare) {
-    if (Array.isArray(compare.ids)) selectedCount = compare.ids.length;
-    else if (Array.isArray(compare)) selectedCount = compare.length;
-  }
-
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [page]);
@@ -84,7 +79,7 @@ export default function Schools() {
   useEffect(() => {
     let cancelled = false;
     setState((prev) => ({ ...prev, error: null }));
-    
+
     listSchools({
       page,
       limit: PAGE_SIZE,
@@ -105,7 +100,9 @@ export default function Schools() {
         setState({ items: null, meta: null, error: err.message });
       });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [page, safeSearch, govParam, specParam, minScoreParam, maxScoreParam, durationParam, genderParam]);
 
   return (

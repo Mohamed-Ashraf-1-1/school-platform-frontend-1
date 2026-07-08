@@ -21,6 +21,31 @@ export default function SchoolFilters({ filters, onChange, onReset }) {
   const [specializations, setSpecializations] = useState([]);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // The search box keeps its OWN local state and only pushes up to the
+  // parent (which writes it into the URL) after the user pauses typing.
+  // Previously every keystroke called onChange -> setSearchParams
+  // immediately, rewriting the URL and pushing a new history entry on every
+  // single character - that caused fast typing to race against itself
+  // (a stale/partial value could reach the API before the final one).
+  const [searchInput, setSearchInput] = useState(filters.search);
+
+  useEffect(() => {
+    // Keep local state in sync when the search changes from OUTSIDE typing
+    // (e.g. the Reset button, or landing directly on a ?search=... URL).
+    setSearchInput(filters.search);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.search]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput !== filters.search) {
+        onChange({ ...filters, search: searchInput });
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchInput]);
+
   useEffect(() => {
     governoratesApi.list({ limit: 100 }).then((res) => setGovernorates(res.data || [])).catch(() => {});
     specializationsApi.list({ limit: 100 }).then((res) => setSpecializations(res.data || [])).catch(() => {});
@@ -40,8 +65,8 @@ export default function SchoolFilters({ filters, onChange, onReset }) {
         </label>
         <input
           className="input"
-          value={filters.search}
-          onChange={(e) => update('search', e.target.value)}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
           placeholder={t('hero_search_placeholder')}
           maxLength={100}
           autoComplete="off"
@@ -132,6 +157,21 @@ export default function SchoolFilters({ filters, onChange, onReset }) {
           {Content}
         </div>
       </aside>
+
+      {mobileOpen && (
+        <div className="fixed inset-0 z-[95] lg:hidden">
+          <div className="absolute inset-0 bg-ink-900/50" onClick={() => setMobileOpen(false)} />
+          <div className="absolute inset-y-0 start-0 w-[85%] max-w-sm animate-fadeIn overflow-y-auto bg-white p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-base font-semibold text-ink-900">{t('filters_title')}</h2>
+              <button onClick={() => setMobileOpen(false)} aria-label={t('close')}>
+                <FiX className="h-5 w-5 text-ink-500" />
+              </button>
+            </div>
+            {Content}
+          </div>
+        </div>
+      )}
     </>
   );
 }
