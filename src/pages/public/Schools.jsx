@@ -168,11 +168,11 @@ export default function Schools() {
         </div>
       </div>
 
-      {/* 🏁 الشريط العائم السفلي الذي يظهر تلقائياً ويحتوي على زر الذهاب لصفحة المقارنة */}
-      {compare?.list && compare.list.length >= 2 && (
+      {/* 🏁 الشريط العائم السفلي الذي يظهر تلقائياً ويحتوي على زر الذهاب لصفحة المقارنة بعد تعديله لـ compare.ids */}
+      {compare?.ids && compare.ids.length >= 2 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-ink-900 text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-6 animate-fade-in backdrop-blur-md bg-opacity-95 border border-ink-700">
           <div className="text-sm font-medium">
-            {t('compare_selected_count', { count: compare.list.length })} {compare.list.length} {t('nav_compare')}
+            {t('compare_selected_count', { count: compare.ids.length })} {compare.ids.length} {t('nav_compare')}
           </div>
           <button
             onClick={() => navigate('/compare')}
