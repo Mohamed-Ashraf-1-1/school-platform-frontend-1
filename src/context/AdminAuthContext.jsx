@@ -2,7 +2,9 @@ import { createContext, useContext, useState } from 'react';
 
 const AdminAuthContext = createContext(null);
 const STORAGE_KEY = 'admin_ui_gate';
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
+
+// تم تثبيت الباسورد هنا مباشرة لضمان الدخول التلقائي بدون مشاكل السيرفر أو الـ Environment Variables
+const ADMIN_PASSWORD = 'Sch@ol_Platf0rm_Pass_2026!';
 
 export function AdminAuthProvider({ children }) {
   const [isAuthed, setIsAuthed] = useState(() => sessionStorage.getItem(STORAGE_KEY) === 'true');
@@ -22,7 +24,9 @@ export function AdminAuthProvider({ children }) {
   };
 
   return (
-    <AdminAuthContext.Provider value={{ isAuthed, login, logout }}>{children}</AdminAuthContext.Provider>
+    <AdminAuthContext.Provider value={{ isAuthed, login, logout }}>
+      {children}
+    </AdminAuthContext.Provider>
   );
 }
 
