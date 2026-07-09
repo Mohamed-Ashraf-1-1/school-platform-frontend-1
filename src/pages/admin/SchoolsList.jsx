@@ -103,9 +103,9 @@ export default function SchoolsList() {
               <FiEye className="h-3.5 w-3.5" />
             </a>
             
-            {/* 🛠️ تعديل توجيه زر التعديل ليعتمد على المسار السري والـ ID الرقمي الآمن */}
+            {/* 🛠️ ✅ تم تعديل تمرير المعرّف هنا ليكون row.slug بدلاً من row.id لتظهر البيانات القديمة فوراً */}
             <button
-              onClick={() => navigate(`/secret-hub-portal-2026-x/schools/${row.id}/edit`)}
+              onClick={() => navigate(`/secret-hub-portal-2026-x/schools/${row.slug}/edit`)}
               className="flex h-8 w-8 items-center justify-center rounded-full text-ink-500 hover:bg-ink-50"
               aria-label={t('admin_edit')}
             >
