@@ -5,7 +5,7 @@ export default function App() {
   return (
     <div>
       <AppRouter />
-      <WhatsappButton />
+      {/* <WhatsappButton /> */}
       <Analytics />
     </div>
   );
